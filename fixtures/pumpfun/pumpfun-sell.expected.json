@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixPumpfunSe11111111111111111111111111111111111111111111111111111",
+      "timestamp": 1735714800,
+      "type": "SWAP",
+      "protocol": "PUMPFUN",
+      "tokenInMint": "PumpFunMemeToken111111111111111111111111pump",
+      "amountIn": 35000000,
+      "tokenOutMint": "So11111111111111111111111111111111111111112",
+      "amountOut": 0.94,
+      "feeLamports": 5000
+    }
+  ]
+}

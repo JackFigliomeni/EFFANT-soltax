@@ -1,0 +1,33 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 transferred 150.25 USDC to FriendWa11et11111111111111111111111111111111.",
+  "type": "TRANSFER",
+  "source": "SOLANA_PROGRAM_LIBRARY",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixSp1TransferOut1111111111111111111111111111111111111111111111",
+  "slot": 310003000,
+  "timestamp": 1735700400,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "FriendWa11et11111111111111111111111111111111",
+      "fromTokenAccount": "AtaUserWa11etMain111111",
+      "toTokenAccount": "AtaFriendWa11et11111111",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "tokenAmount": 150.25,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": []
+    }
+  ],
+  "events": {}
+}

@@ -1,0 +1,33 @@
+{
+  "description": "ExchangeHotWa11et111111111111111111111111111 transferred 500 USDC to UserWa11etMain111111111111111111111111111111.",
+  "type": "TRANSFER",
+  "source": "SOLANA_PROGRAM_LIBRARY",
+  "fee": 5000,
+  "feePayer": "ExchangeHotWa11et111111111111111111111111111",
+  "signature": "FixSp1TransferInExchange111111111111111111111111111111111111111",
+  "slot": 310005000,
+  "timestamp": 1735707600,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "ExchangeHotWa11et111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaExchangeHotWa11et111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "tokenAmount": 500,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": []
+    }
+  ],
+  "events": {}
+}

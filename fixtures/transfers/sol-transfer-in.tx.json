@@ -1,0 +1,29 @@
+{
+  "description": "ExchangeHotWa11et111111111111111111111111111 transferred 2 SOL to UserWa11etMain111111111111111111111111111111.",
+  "type": "TRANSFER",
+  "source": "SYSTEM_PROGRAM",
+  "fee": 5000,
+  "feePayer": "ExchangeHotWa11et111111111111111111111111111",
+  "signature": "FixSo1TransferIn11111111111111111111111111111111111111111111111",
+  "slot": 310002000,
+  "timestamp": 1735696800,
+  "nativeTransfers": [
+    {
+      "fromUserAccount": "ExchangeHotWa11et111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "amount": 2000000000
+    }
+  ],
+  "tokenTransfers": [],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "11111111111111111111111111111111",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": []
+    }
+  ],
+  "events": {}
+}

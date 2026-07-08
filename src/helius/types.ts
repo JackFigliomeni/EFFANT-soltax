@@ -1,7 +1,38 @@
+export interface NativeTransfer {
+  fromUserAccount: string;
+  toUserAccount: string;
+  /** Lamports. */
+  amount: number;
+}
+
+export interface TokenTransfer {
+  fromUserAccount: string;
+  toUserAccount: string;
+  fromTokenAccount?: string;
+  toTokenAccount?: string;
+  mint: string;
+  /** Decimal-adjusted amount, as Helius provides it. */
+  tokenAmount: number;
+  tokenStandard?: string;
+}
+
+export interface InnerInstruction {
+  programId: string;
+  accounts?: string[];
+  data?: string;
+}
+
+export interface ParsedInstruction {
+  programId: string;
+  accounts?: string[];
+  data?: string;
+  innerInstructions?: InnerInstruction[];
+}
+
 /**
  * Subset of the Helius Enhanced Transactions API response that we rely on.
  * The full parsed transaction is preserved verbatim in the cache; these are
- * just the fields the client itself needs to paginate and key the cache.
+ * the fields the client and classifier actually read.
  */
 export interface HeliusParsedTransaction {
   signature: string;
@@ -12,6 +43,10 @@ export interface HeliusParsedTransaction {
   fee: number;
   feePayer: string;
   description: string;
+  nativeTransfers?: NativeTransfer[];
+  tokenTransfers?: TokenTransfer[];
+  instructions?: ParsedInstruction[];
+  transactionError?: unknown;
   [key: string]: unknown;
 }
 

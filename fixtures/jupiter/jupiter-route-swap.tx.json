@@ -1,0 +1,76 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 swapped 3 SOL for 450 USDC on Jupiter.",
+  "type": "SWAP",
+  "source": "JUPITER",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixJupiterRouteSwap111111111111111111111111111111111111111111111",
+  "slot": 310012000,
+  "timestamp": 1735732800,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "JupiterHopPoo1A11111111111111111111111111111",
+      "fromTokenAccount": "AtaUserWa11etMain111111",
+      "toTokenAccount": "AtaJupiterHopPoo1A11111",
+      "mint": "So11111111111111111111111111111111111111112",
+      "tokenAmount": 3,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "JupiterHopPoo1A11111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaJupiterHopPoo1A11111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+      "tokenAmount": 40,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "JupiterHopPoo1B11111111111111111111111111111",
+      "fromTokenAccount": "AtaUserWa11etMain111111",
+      "toTokenAccount": "AtaJupiterHopPoo1B11111",
+      "mint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+      "tokenAmount": 40,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "JupiterHopPoo1B11111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaJupiterHopPoo1B11111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "tokenAmount": 450,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": [
+        {
+          "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+          "accounts": [],
+          "data": ""
+        },
+        {
+          "programId": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
+          "accounts": [],
+          "data": ""
+        },
+        {
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "accounts": [],
+          "data": ""
+        }
+      ]
+    }
+  ],
+  "events": {}
+}

@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixStakingRewardWithdraw11111111111111111111111111111111111111111",
+      "timestamp": 1735743600,
+      "type": "INCOME",
+      "protocol": null,
+      "tokenInMint": null,
+      "amountIn": null,
+      "tokenOutMint": "So11111111111111111111111111111111111111112",
+      "amountOut": 0.35,
+      "feeLamports": 5000
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixJupiterRouteSwap111111111111111111111111111111111111111111111",
+      "timestamp": 1735732800,
+      "type": "SWAP",
+      "protocol": "JUPITER",
+      "tokenInMint": "So11111111111111111111111111111111111111112",
+      "amountIn": 3,
+      "tokenOutMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "amountOut": 450,
+      "feeLamports": 5000
+    }
+  ]
+}

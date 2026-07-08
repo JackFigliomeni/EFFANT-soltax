@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixUnknownProgramSwap111111111111111111111111111111111111111111",
+      "timestamp": 1735761600,
+      "type": "UNKNOWN",
+      "protocol": null,
+      "tokenInMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "amountIn": 100,
+      "tokenOutMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "amountOut": 50000,
+      "feeLamports": 5000
+    }
+  ]
+}

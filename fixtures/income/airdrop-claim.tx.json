@@ -1,0 +1,39 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 claimed 500 tokens from a distributor.",
+  "type": "UNKNOWN",
+  "source": "UNKNOWN",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixAirdropC1aim111111111111111111111111111111111111111111111111",
+  "slot": 310016000,
+  "timestamp": 1735747200,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "AirdropDistributor11111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaAirdropDistributor11",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "C1aimedAirdropToken1111111111111111111111111",
+      "tokenAmount": 500,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "MerkLeDistributorProgram11111111111111111111",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": [
+        {
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "accounts": [],
+          "data": ""
+        }
+      ]
+    }
+  ],
+  "events": {}
+}

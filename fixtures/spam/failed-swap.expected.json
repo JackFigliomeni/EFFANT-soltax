@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixFai1edSwap1111111111111111111111111111111111111111111111111111",
+      "timestamp": 1735758000,
+      "type": "FAILED",
+      "protocol": null,
+      "tokenInMint": null,
+      "amountIn": null,
+      "tokenOutMint": null,
+      "amountOut": null,
+      "feeLamports": 5000
+    }
+  ]
+}

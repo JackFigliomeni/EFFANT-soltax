@@ -1,0 +1,29 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 transferred 1 SOL to UserWa11etCo1d111111111111111111111111111111.",
+  "type": "TRANSFER",
+  "source": "SYSTEM_PROGRAM",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixSe1fTransferSo1Out11111111111111111111111111111111111111111111",
+  "slot": 310013000,
+  "timestamp": 1735736400,
+  "nativeTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "UserWa11etCo1d111111111111111111111111111111",
+      "amount": 1000000000
+    }
+  ],
+  "tokenTransfers": [],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "11111111111111111111111111111111",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": []
+    }
+  ],
+  "events": {}
+}

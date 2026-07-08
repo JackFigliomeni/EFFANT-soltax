@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixAirdropC1aim111111111111111111111111111111111111111111111111",
+      "timestamp": 1735747200,
+      "type": "INCOME",
+      "protocol": null,
+      "tokenInMint": null,
+      "amountIn": null,
+      "tokenOutMint": "C1aimedAirdropToken1111111111111111111111111",
+      "amountOut": 500,
+      "feeLamports": 5000
+    }
+  ]
+}

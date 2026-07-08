@@ -1,0 +1,29 @@
+{
+  "description": "SpamAttacker11111111111111111111111111111111 transferred 0.000001 SOL to UserWa11etMain111111111111111111111111111111.",
+  "type": "TRANSFER",
+  "source": "SYSTEM_PROGRAM",
+  "fee": 5000,
+  "feePayer": "SpamAttacker11111111111111111111111111111111",
+  "signature": "FixDustAttack111111111111111111111111111111111111111111111111111",
+  "slot": 310018000,
+  "timestamp": 1735754400,
+  "nativeTransfers": [
+    {
+      "fromUserAccount": "SpamAttacker11111111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "amount": 1000
+    }
+  ],
+  "tokenTransfers": [],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "11111111111111111111111111111111",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": []
+    }
+  ],
+  "events": {}
+}

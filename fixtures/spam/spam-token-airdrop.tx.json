@@ -1,0 +1,69 @@
+{
+  "description": "Mass token airdrop to many wallets.",
+  "type": "TRANSFER",
+  "source": "SOLANA_PROGRAM_LIBRARY",
+  "fee": 5000,
+  "feePayer": "SpamAttacker11111111111111111111111111111111",
+  "signature": "FixSpamTokenAirdrop11111111111111111111111111111111111111111111",
+  "slot": 310017000,
+  "timestamp": 1735750800,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "SpamAttacker11111111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaSpamAttacker11111111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "SpamAirdropToken1111111111111111111111111111",
+      "tokenAmount": 88888,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "SpamAttacker11111111111111111111111111111111",
+      "toUserAccount": "SprayVictimA11111111111111111111111111111111",
+      "fromTokenAccount": "AtaSpamAttacker11111111",
+      "toTokenAccount": "AtaSprayVictimA11111111",
+      "mint": "SpamAirdropToken1111111111111111111111111111",
+      "tokenAmount": 88888,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "SpamAttacker11111111111111111111111111111111",
+      "toUserAccount": "SprayVictimB11111111111111111111111111111111",
+      "fromTokenAccount": "AtaSpamAttacker11111111",
+      "toTokenAccount": "AtaSprayVictimB11111111",
+      "mint": "SpamAirdropToken1111111111111111111111111111",
+      "tokenAmount": 88888,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "SpamAttacker11111111111111111111111111111111",
+      "toUserAccount": "SprayVictimC11111111111111111111111111111111",
+      "fromTokenAccount": "AtaSpamAttacker11111111",
+      "toTokenAccount": "AtaSprayVictimC11111111",
+      "mint": "SpamAirdropToken1111111111111111111111111111",
+      "tokenAmount": 88888,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "SpamAttacker11111111111111111111111111111111",
+      "toUserAccount": "SprayVictimD11111111111111111111111111111111",
+      "fromTokenAccount": "AtaSpamAttacker11111111",
+      "toTokenAccount": "AtaSprayVictimD11111111",
+      "mint": "SpamAirdropToken1111111111111111111111111111",
+      "tokenAmount": 88888,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": []
+    }
+  ],
+  "events": {}
+}

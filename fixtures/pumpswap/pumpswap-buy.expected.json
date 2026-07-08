@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixPumpswapBuy111111111111111111111111111111111111111111111111111",
+      "timestamp": 1735718400,
+      "type": "SWAP",
+      "protocol": "PUMPSWAP",
+      "tokenInMint": "So11111111111111111111111111111111111111112",
+      "amountIn": 2,
+      "tokenOutMint": "GraduatedPumpToken11111111111111111111111111",
+      "amountOut": 100000,
+      "feeLamports": 5000
+    }
+  ]
+}

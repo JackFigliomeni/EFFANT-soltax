@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixDustAttack111111111111111111111111111111111111111111111111111",
+      "timestamp": 1735754400,
+      "type": "SPAM",
+      "protocol": null,
+      "tokenInMint": null,
+      "amountIn": null,
+      "tokenOutMint": "So11111111111111111111111111111111111111112",
+      "amountOut": 0.000001,
+      "feeLamports": 0
+    }
+  ]
+}

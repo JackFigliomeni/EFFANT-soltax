@@ -1,0 +1,29 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 transferred 0.5 SOL to FriendWa11et11111111111111111111111111111111.",
+  "type": "TRANSFER",
+  "source": "SYSTEM_PROGRAM",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixSo1TransferOut1111111111111111111111111111111111111111111111",
+  "slot": 310001000,
+  "timestamp": 1735693200,
+  "nativeTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "FriendWa11et11111111111111111111111111111111",
+      "amount": 500000000
+    }
+  ],
+  "tokenTransfers": [],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "11111111111111111111111111111111",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": []
+    }
+  ],
+  "events": {}
+}

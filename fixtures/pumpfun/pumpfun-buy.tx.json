@@ -1,0 +1,55 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 bought 35000000 tokens on pump.fun.",
+  "type": "SWAP",
+  "source": "PUMP_FUN",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixPumpfunBuy111111111111111111111111111111111111111111111111111",
+  "slot": 310006000,
+  "timestamp": 1735711200,
+  "nativeTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "PumpBondingCurve1111111111111111111111111111",
+      "amount": 1000000000
+    },
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "PumpFeeRecipient1111111111111111111111111111",
+      "amount": 10000000
+    }
+  ],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "PumpBondingCurve1111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaPumpBondingCurve1111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "PumpFunMemeToken111111111111111111111111pump",
+      "tokenAmount": 35000000,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": [
+        {
+          "programId": "11111111111111111111111111111111",
+          "accounts": [],
+          "data": ""
+        },
+        {
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "accounts": [],
+          "data": ""
+        }
+      ]
+    }
+  ],
+  "events": {}
+}

@@ -1,0 +1,48 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 swapped 2 SOL for 100000 tokens on PumpSwap.",
+  "type": "SWAP",
+  "source": "PUMP_AMM",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixPumpswapBuy111111111111111111111111111111111111111111111111111",
+  "slot": 310008000,
+  "timestamp": 1735718400,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "PumpSwapPoo1Vau1t111111111111111111111111111",
+      "fromTokenAccount": "AtaUserWa11etMain111111",
+      "toTokenAccount": "AtaPumpSwapPoo1Vau1t111",
+      "mint": "So11111111111111111111111111111111111111112",
+      "tokenAmount": 2,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "PumpSwapPoo1Vau1t111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaPumpSwapPoo1Vau1t111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "GraduatedPumpToken11111111111111111111111111",
+      "tokenAmount": 100000,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": [
+        {
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "accounts": [],
+          "data": ""
+        }
+      ]
+    }
+  ],
+  "events": {}
+}

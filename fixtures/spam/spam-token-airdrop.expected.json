@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixSpamTokenAirdrop11111111111111111111111111111111111111111111",
+      "timestamp": 1735750800,
+      "type": "SPAM",
+      "protocol": null,
+      "tokenInMint": null,
+      "amountIn": null,
+      "tokenOutMint": "SpamAirdropToken1111111111111111111111111111",
+      "amountOut": 88888,
+      "feeLamports": 0
+    }
+  ]
+}

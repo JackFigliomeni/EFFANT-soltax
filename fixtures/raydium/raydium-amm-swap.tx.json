@@ -1,0 +1,48 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 swapped 250 USDC for 100 RAY on Raydium.",
+  "type": "SWAP",
+  "source": "RAYDIUM",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixRaydiumAmmSwap1111111111111111111111111111111111111111111111",
+  "slot": 310010000,
+  "timestamp": 1735725600,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "RaydiumPoo1Vau1t1111111111111111111111111111",
+      "fromTokenAccount": "AtaUserWa11etMain111111",
+      "toTokenAccount": "AtaRaydiumPoo1Vau1t1111",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "tokenAmount": 250,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "RaydiumPoo1Vau1t1111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaRaydiumPoo1Vau1t1111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+      "tokenAmount": 100,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": [
+        {
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "accounts": [],
+          "data": ""
+        }
+      ]
+    }
+  ],
+  "events": {}
+}

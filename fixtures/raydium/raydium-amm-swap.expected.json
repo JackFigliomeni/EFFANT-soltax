@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixRaydiumAmmSwap1111111111111111111111111111111111111111111111",
+      "timestamp": 1735725600,
+      "type": "SWAP",
+      "protocol": "RAYDIUM_AMM",
+      "tokenInMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "amountIn": 250,
+      "tokenOutMint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+      "amountOut": 100,
+      "feeLamports": 5000
+    }
+  ]
+}

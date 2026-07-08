@@ -1,0 +1,36 @@
+{
+  "description": "",
+  "type": "SWAP",
+  "source": "RAYDIUM",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixFai1edSwap1111111111111111111111111111111111111111111111111111",
+  "slot": 310019000,
+  "timestamp": 1735758000,
+  "nativeTransfers": [],
+  "tokenTransfers": [],
+  "accountData": [],
+  "transactionError": {
+    "InstructionError": [
+      2,
+      {
+        "Custom": 6001
+      }
+    ]
+  },
+  "instructions": [
+    {
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": [
+        {
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "accounts": [],
+          "data": ""
+        }
+      ]
+    }
+  ],
+  "events": {}
+}

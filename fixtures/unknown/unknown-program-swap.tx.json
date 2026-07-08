@@ -1,0 +1,48 @@
+{
+  "description": "UserWa11etMain111111111111111111111111111111 swapped on an unrecognized program.",
+  "type": "UNKNOWN",
+  "source": "UNKNOWN",
+  "fee": 5000,
+  "feePayer": "UserWa11etMain111111111111111111111111111111",
+  "signature": "FixUnknownProgramSwap111111111111111111111111111111111111111111",
+  "slot": 310020000,
+  "timestamp": 1735761600,
+  "nativeTransfers": [],
+  "tokenTransfers": [
+    {
+      "fromUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "toUserAccount": "MysteryPoo1Vau1t1111111111111111111111111111",
+      "fromTokenAccount": "AtaUserWa11etMain111111",
+      "toTokenAccount": "AtaMysteryPoo1Vau1t1111",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "tokenAmount": 100,
+      "tokenStandard": "Fungible"
+    },
+    {
+      "fromUserAccount": "MysteryPoo1Vau1t1111111111111111111111111111",
+      "toUserAccount": "UserWa11etMain111111111111111111111111111111",
+      "fromTokenAccount": "AtaMysteryPoo1Vau1t1111",
+      "toTokenAccount": "AtaUserWa11etMain111111",
+      "mint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "tokenAmount": 50000,
+      "tokenStandard": "Fungible"
+    }
+  ],
+  "accountData": [],
+  "transactionError": null,
+  "instructions": [
+    {
+      "programId": "MysteryDexProgram111111111111111111111111111",
+      "accounts": [],
+      "data": "",
+      "innerInstructions": [
+        {
+          "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "accounts": [],
+          "data": ""
+        }
+      ]
+    }
+  ],
+  "events": {}
+}

@@ -1,0 +1,16 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixSp1TransferOut1111111111111111111111111111111111111111111111",
+      "timestamp": 1735700400,
+      "type": "TRANSFER_OUT",
+      "protocol": null,
+      "tokenInMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "amountIn": 150.25,
+      "tokenOutMint": null,
+      "amountOut": null,
+      "feeLamports": 5000
+    }
+  ]
+}

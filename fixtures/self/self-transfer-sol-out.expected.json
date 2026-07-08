@@ -1,0 +1,19 @@
+{
+  "wallet": "UserWa11etMain111111111111111111111111111111",
+  "events": [
+    {
+      "signature": "FixSe1fTransferSo1Out11111111111111111111111111111111111111111111",
+      "timestamp": 1735736400,
+      "type": "SELF_TRANSFER",
+      "protocol": null,
+      "tokenInMint": "So11111111111111111111111111111111111111112",
+      "amountIn": 1,
+      "tokenOutMint": null,
+      "amountOut": null,
+      "feeLamports": 5000
+    }
+  ],
+  "ownedWallets": [
+    "UserWa11etCo1d111111111111111111111111111111"
+  ]
+}
