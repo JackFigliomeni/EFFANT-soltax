@@ -4,12 +4,21 @@ export type EventType =
   | "SELF_TRANSFER"
   | "SWAP"
   | "INCOME"
+  | "FEE_ONLY"
   | "SPAM"
   | "FAILED"
   | "UNKNOWN";
 
-export type Protocol =
+/**
+ * Protocols detected by program ID. Swaps can also carry other protocol
+ * strings (e.g. "DFLOW", "OKX") taken from Helius' own source tag when the
+ * program is not one we match ourselves.
+ */
+export type KnownProtocol =
   | "JUPITER"
+  | "OKX"
+  | "DFLOW"
+  | "MOONSHOT"
   | "PUMPFUN"
   | "PUMPSWAP"
   | "RAYDIUM_AMM"
@@ -29,7 +38,7 @@ export interface NormalizedEvent {
   signature: string;
   timestamp: number;
   type: EventType;
-  protocol: Protocol | null;
+  protocol: string | null;
   tokenInMint: string | null;
   amountIn: number | null;
   tokenOutMint: string | null;

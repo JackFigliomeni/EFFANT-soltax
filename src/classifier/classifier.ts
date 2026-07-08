@@ -1,8 +1,11 @@
 import type { HeliusParsedTransaction } from "../helius/types.js";
 import {
+  DFLOW_PROGRAM,
   JUPITER_V6_PROGRAM,
   LAMPORTS_PER_SOL,
+  MOONSHOT_PROGRAM,
   NATIVE_SOL_MINT,
+  OKX_ROUTER_PROGRAM,
   PUMPFUN_PROGRAM,
   PUMPSWAP_PROGRAM,
   RAYDIUM_AMM_PROGRAM,
@@ -13,8 +16,8 @@ import type {
   ClassifierContext,
   ClassifyAllOptions,
   EventType,
+  KnownProtocol,
   NormalizedEvent,
-  Protocol,
 } from "./types.js";
 
 const DEFAULT_DUST_THRESHOLD_LAMPORTS = 100_000;
@@ -51,9 +54,12 @@ function collectProgramIds(tx: HeliusParsedTransaction): Set<string> {
   return ids;
 }
 
-/** Jupiter first: a routed swap contains the hop AMMs as inner instructions. */
-function detectProtocol(programIds: Set<string>): Protocol | null {
+/** Routers/aggregators first: their routes contain the hop AMMs as inner instructions. */
+function detectProtocol(programIds: Set<string>): KnownProtocol | null {
   if (programIds.has(JUPITER_V6_PROGRAM)) return "JUPITER";
+  if (programIds.has(OKX_ROUTER_PROGRAM)) return "OKX";
+  if (programIds.has(DFLOW_PROGRAM)) return "DFLOW";
+  if (programIds.has(MOONSHOT_PROGRAM)) return "MOONSHOT";
   if (programIds.has(PUMPFUN_PROGRAM)) return "PUMPFUN";
   if (programIds.has(PUMPSWAP_PROGRAM)) return "PUMPSWAP";
   if (programIds.has(RAYDIUM_CLMM_PROGRAM)) return "RAYDIUM_CLMM";
@@ -174,12 +180,16 @@ export function classifyTransaction(
   const primaryGave = flows.gave[0];
   const primaryGot = flows.got[0];
 
-  // Gave and got something: a swap. A known protocol tags it; an unknown
-  // program with two-way flows goes to the UNKNOWN worklist instead of being
+  // Gave and got something: a swap. A program we match tags it; otherwise
+  // fall back to Helius' own SWAP tag (covers aggregators like DFLOW/OKX
+  // without hardcoding each router). Two-way flows through a program neither
+  // we nor Helius recognize go to the UNKNOWN worklist instead of being
   // silently mislabeled.
   if (primaryGave && primaryGot) {
-    return event(protocol ? "SWAP" : "UNKNOWN", {
-      protocol,
+    const heliusSaysSwap = tx.type === "SWAP" && tx.source !== "UNKNOWN";
+    const swapProtocol = protocol ?? (heliusSaysSwap ? tx.source : null);
+    return event(swapProtocol !== null ? "SWAP" : "UNKNOWN", {
+      protocol: swapProtocol,
       tokenInMint: primaryGave.mint,
       amountIn: primaryGave.amount,
       tokenOutMint: primaryGot.mint,
@@ -241,7 +251,17 @@ export function classifyTransaction(
     return event("TRANSFER_IN", received);
   }
 
-  return event("UNKNOWN");
+  // No net value movement at all.
+  if (owned.has(tx.feePayer)) {
+    // The user signed a transaction that moved nothing: account housekeeping
+    // (ATA open/close rent round-trips, approvals, token metadata ops). Only
+    // the network fee is a real cost.
+    return event("FEE_ONLY");
+  }
+  // Someone else pushed a no-value transaction at this wallet: cNFT spam
+  // mints (Bubblegum), or third-party transactions that merely reference the
+  // user's accounts. Nothing moved, the user paid nothing.
+  return event("SPAM");
 }
 
 /**

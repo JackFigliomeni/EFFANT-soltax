@@ -1,0 +1,16 @@
+{
+  "wallet": "25VwSBFEFVqqTLh5SR1qESbMwdZU9puS9JtDSVKvmXYQ",
+  "events": [
+    {
+      "signature": "58aVpfvr5tyWJ185jm34givVJz4FXrGpHEJgVbf8j8M9NCq2KyjFztYFomHDBRnabuTtjwRMWD6WkRFCGtt3iX63",
+      "timestamp": 1772195150,
+      "type": "FEE_ONLY",
+      "protocol": null,
+      "tokenInMint": null,
+      "amountIn": null,
+      "tokenOutMint": null,
+      "amountOut": null,
+      "feeLamports": 7145
+    }
+  ]
+}

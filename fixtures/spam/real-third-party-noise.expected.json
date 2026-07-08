@@ -1,0 +1,16 @@
+{
+  "wallet": "25VwSBFEFVqqTLh5SR1qESbMwdZU9puS9JtDSVKvmXYQ",
+  "events": [
+    {
+      "signature": "3gGPwX8WkLCYANNV3k5RkJKLimgdkDEHehaej44YvZKncGWv7bXR2gmYckSR2K8Tu2dnRQuzXpcYU6HGy7DTaUoE",
+      "timestamp": 1783399626,
+      "type": "SPAM",
+      "protocol": null,
+      "tokenInMint": null,
+      "amountIn": null,
+      "tokenOutMint": null,
+      "amountOut": null,
+      "feeLamports": 0
+    }
+  ]
+}

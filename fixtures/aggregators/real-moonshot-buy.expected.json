@@ -1,0 +1,16 @@
+{
+  "wallet": "25VwSBFEFVqqTLh5SR1qESbMwdZU9puS9JtDSVKvmXYQ",
+  "events": [
+    {
+      "signature": "32v9QyrcQgYn3HoZLF14iPHVXVGCTheVboWyxi52sjhuB3B21ReF9X3WXNVyyUbKJfYUG78m6MkDtgyiCCRKgT9N",
+      "timestamp": 1740500951,
+      "type": "SWAP",
+      "protocol": "MOONSHOT",
+      "tokenInMint": "So11111111111111111111111111111111111111112",
+      "amountIn": 0.00903928,
+      "tokenOutMint": "Hj7tVRsicmZ6jSbykgp1G5AwCmdtYiMESiCy1n8ymoon",
+      "amountOut": 17349.380697671,
+      "feeLamports": 25000
+    }
+  ]
+}

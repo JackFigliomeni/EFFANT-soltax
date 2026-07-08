@@ -1,0 +1,16 @@
+{
+  "wallet": "25VwSBFEFVqqTLh5SR1qESbMwdZU9puS9JtDSVKvmXYQ",
+  "events": [
+    {
+      "signature": "46E5WKkY9tw1fuBRt4phVmxSsAxQtxTgEmcE9vCBJPZtzkhXz3PZbLCzwY4q7atmeK6mqzhkJmqDsAZwGXTka5ds",
+      "timestamp": 1737689895,
+      "type": "SWAP",
+      "protocol": "OKX",
+      "tokenInMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "amountIn": 96.945261,
+      "tokenOutMint": "So11111111111111111111111111111111111111112",
+      "amountOut": 0.761571216,
+      "feeLamports": 2223972
+    }
+  ]
+}

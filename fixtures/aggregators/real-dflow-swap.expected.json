@@ -1,0 +1,16 @@
+{
+  "wallet": "25VwSBFEFVqqTLh5SR1qESbMwdZU9puS9JtDSVKvmXYQ",
+  "events": [
+    {
+      "signature": "5jRF1AVUMD3XwE63XQ4ZavaGagKwxaetDEEdkwKbEcchkWuTvgZApoVYfjpdx3UwZhRiKRBqkYtzdtUimekhVccp",
+      "timestamp": 1771937915,
+      "type": "SWAP",
+      "protocol": "DFLOW",
+      "tokenInMint": "HQasg9aKwQzHvAQn2zD1mhVmht84BACdeycJLYEwBAGS",
+      "amountIn": 36668.827179772,
+      "tokenOutMint": "8jiVXftnn2ZG6bugK7HAH5j2G3D6TpsG521gqsWwpump",
+      "amountOut": 3760.429836,
+      "feeLamports": 80001
+    }
+  ]
+}
