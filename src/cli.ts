@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 import "dotenv/config";
 import { analyze, InvalidSolanaAddressError } from "./analyze.js";
+import { classifyStream } from "./classifier/classifier.js";
 import { runFixtures } from "./classifier/fixtureRunner.js";
+import { NATIVE_SOL_MINT } from "./classifier/programs.js";
 import { collectUnknowns } from "./classifier/unknowns.js";
 import { HeliusClient } from "./helius/heliusClient.js";
 import { TransactionCache } from "./helius/transactionCache.js";
+import { EventPricer, type PricedEvent } from "./pricing/eventPricer.js";
+import { SolPriceFeed } from "./pricing/solPriceFeed.js";
 
 function printUsage(): void {
   console.error(
@@ -12,9 +16,12 @@ function printUsage(): void {
       "Usage: soltax <command>",
       "",
       "Commands:",
-      "  analyze <solana-wallet-address>   validate the address and fetch full history",
-      "  unknowns <solana-wallet-address>  list unclassified cached txs by program frequency",
-      "  test-fixtures [dir]               run the classifier against fixtures (default: fixtures/)",
+      "  analyze <solana-wallet-address>            validate the address and fetch full history",
+      "  events <solana-wallet-address> [flags]     classified events with USD values",
+      "      --include-spam    keep SPAM and FAILED events in the output",
+      "      --json            emit one JSON object per line instead of a table",
+      "  unknowns <solana-wallet-address>           list unclassified cached txs by program frequency",
+      "  test-fixtures [dir]                        run the classifier against fixtures (default: fixtures/)",
     ].join("\n"),
   );
 }
@@ -72,6 +79,91 @@ async function runAnalyze(address: string): Promise<void> {
       `(${result.fetched} newly fetched this run).`,
   );
   console.log(`Cache file: ${result.cacheFile}`);
+}
+
+function fmtMint(mint: string): string {
+  return mint === NATIVE_SOL_MINT ? "SOL" : `${mint.slice(0, 8)}…`;
+}
+
+function fmtAmount(n: number): string {
+  return n >= 1_000_000
+    ? n.toLocaleString("en-US", { maximumFractionDigits: 0 })
+    : n.toLocaleString("en-US", { maximumFractionDigits: 4 });
+}
+
+function fmtEventLine(e: PricedEvent): string {
+  const when = new Date(e.timestamp * 1000).toISOString().slice(0, 16).replace("T", " ");
+  const type = e.type.padEnd(13);
+  const proto = (e.protocol ?? "").padEnd(12);
+  const gave = e.tokenInMint !== null && e.amountIn !== null
+    ? `-${fmtAmount(e.amountIn)} ${fmtMint(e.tokenInMint)}`
+    : "";
+  const got = e.tokenOutMint !== null && e.amountOut !== null
+    ? `+${fmtAmount(e.amountOut)} ${fmtMint(e.tokenOutMint)}`
+    : "";
+  const legs = [gave, got].filter(Boolean).join(" → ").padEnd(44);
+  const value = e.needsPrice
+    ? "NEEDS_PRICE"
+    : e.usdValue !== null
+      ? `$${e.usdValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : "";
+  return `${when}  ${type} ${proto} ${legs} ${value}`;
+}
+
+async function runEvents(address: string, flags: string[]): Promise<void> {
+  validateAddressOrExit(address);
+  const includeSpam = flags.includes("--include-spam");
+  const asJson = flags.includes("--json");
+
+  const cache = await TransactionCache.open(cacheDir(), address);
+  try {
+    if (cache.size === 0) {
+      console.error(
+        `Error: no cached history for ${address}. Run "soltax analyze ${address}" first.`,
+      );
+      process.exit(1);
+    }
+
+    const feed = new SolPriceFeed({
+      cacheDir: process.env["SOLTAX_PRICE_CACHE_DIR"] ?? ".cache/prices/sol-usd",
+      ...(process.env["COINGECKO_API_KEY"] && {
+        coinGeckoApiKey: process.env["COINGECKO_API_KEY"],
+      }),
+    });
+    const pricer = new EventPricer(feed);
+
+    const events: PricedEvent[] = [];
+    let done = 0;
+    const stream = classifyStream(cache.readAll(), {
+      wallet: address,
+      ownedWallets: ownedWallets(),
+      includeSpam,
+    });
+    for await (const priced of pricer.priceEvents(stream)) {
+      events.push(priced);
+      done += 1;
+      if (!asJson) process.stderr.write(`\r  pricing… ${done}`);
+    }
+    if (!asJson) process.stderr.write("\r");
+    events.sort((a, b) => a.timestamp - b.timestamp);
+
+    if (asJson) {
+      for (const e of events) console.log(JSON.stringify(e));
+      return;
+    }
+
+    for (const e of events) console.log(fmtEventLine(e));
+
+    const priced = events.filter((e) => e.usdValue !== null).length;
+    const needing = events.filter((e) => e.needsPrice).length;
+    const feesUsd = events.reduce((s, e) => s + (e.feeUsd ?? 0), 0);
+    console.log(
+      `\n${events.length} events · ${priced} priced · ${needing} NEEDS_PRICE · ` +
+        `network fees $${feesUsd.toFixed(2)}`,
+    );
+  } finally {
+    await cache.close();
+  }
 }
 
 async function runUnknowns(address: string): Promise<void> {
@@ -141,6 +233,16 @@ async function main(argv: string[]): Promise<void> {
         process.exit(1);
       }
       await runAnalyze(address);
+      break;
+    }
+    case "events": {
+      const address = rest[0];
+      if (!address) {
+        console.error("Error: missing <solana-wallet-address> argument.");
+        printUsage();
+        process.exit(1);
+      }
+      await runEvents(address, rest.slice(1));
       break;
     }
     case "unknowns": {
