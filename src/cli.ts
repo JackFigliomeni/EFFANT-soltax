@@ -9,6 +9,7 @@ import { HeliusClient } from "./helius/heliusClient.js";
 import { TransactionCache } from "./helius/transactionCache.js";
 import { EventPricer, type PricedEvent } from "./pricing/eventPricer.js";
 import { SolPriceFeed } from "./pricing/solPriceFeed.js";
+import { FifoEngine } from "./tax/fifoEngine.js";
 
 function printUsage(): void {
   console.error(
@@ -20,6 +21,7 @@ function printUsage(): void {
       "  events <solana-wallet-address> [flags]     classified events with USD values",
       "      --include-spam    keep SPAM and FAILED events in the output",
       "      --json            emit one JSON object per line instead of a table",
+      "  gains <solana-wallet-address>              FIFO cost-basis report: gains, income, flags",
       "  unknowns <solana-wallet-address>           list unclassified cached txs by program frequency",
       "  test-fixtures [dir]                        run the classifier against fixtures (default: fixtures/)",
     ].join("\n"),
@@ -110,11 +112,12 @@ function fmtEventLine(e: PricedEvent): string {
   return `${when}  ${type} ${proto} ${legs} ${value}`;
 }
 
-async function runEvents(address: string, flags: string[]): Promise<void> {
-  validateAddressOrExit(address);
-  const includeSpam = flags.includes("--include-spam");
-  const asJson = flags.includes("--json");
-
+/** Streams cache -> classifier -> pricer and returns chronological events. */
+async function collectPricedEvents(
+  address: string,
+  includeSpam: boolean,
+  quiet: boolean,
+): Promise<PricedEvent[]> {
   const cache = await TransactionCache.open(cacheDir(), address);
   try {
     if (cache.size === 0) {
@@ -133,7 +136,6 @@ async function runEvents(address: string, flags: string[]): Promise<void> {
     const pricer = new EventPricer(feed);
 
     const events: PricedEvent[] = [];
-    let done = 0;
     const stream = classifyStream(cache.readAll(), {
       wallet: address,
       ownedWallets: ownedWallets(),
@@ -141,29 +143,77 @@ async function runEvents(address: string, flags: string[]): Promise<void> {
     });
     for await (const priced of pricer.priceEvents(stream)) {
       events.push(priced);
-      done += 1;
-      if (!asJson) process.stderr.write(`\r  pricing… ${done}`);
+      if (!quiet) process.stderr.write(`\r  pricing… ${events.length}`);
     }
-    if (!asJson) process.stderr.write("\r");
+    if (!quiet) process.stderr.write("\r");
     events.sort((a, b) => a.timestamp - b.timestamp);
-
-    if (asJson) {
-      for (const e of events) console.log(JSON.stringify(e));
-      return;
-    }
-
-    for (const e of events) console.log(fmtEventLine(e));
-
-    const priced = events.filter((e) => e.usdValue !== null).length;
-    const needing = events.filter((e) => e.needsPrice).length;
-    const feesUsd = events.reduce((s, e) => s + (e.feeUsd ?? 0), 0);
-    console.log(
-      `\n${events.length} events · ${priced} priced · ${needing} NEEDS_PRICE · ` +
-        `network fees $${feesUsd.toFixed(2)}`,
-    );
+    return events;
   } finally {
     await cache.close();
   }
+}
+
+function usd(n: number): string {
+  const sign = n < 0 ? "-" : "";
+  return `${sign}$${Math.abs(n).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+async function runGains(address: string): Promise<void> {
+  validateAddressOrExit(address);
+  const events = await collectPricedEvents(address, false, false);
+  const result = new FifoEngine().process(events);
+  const t = result.totals;
+
+  console.log(`FIFO cost-basis report for ${address}\n`);
+  console.log(`  Short-term gain/loss   ${usd(t.shortTermGainUsd)}`);
+  console.log(`  Long-term gain/loss    ${usd(t.longTermGainUsd)}`);
+  console.log(`  Ordinary income        ${usd(t.ordinaryIncomeUsd)}`);
+  console.log(
+    `\n  Disposals: ${result.disposals.length} ` +
+      `(${t.unresolvedDisposals} unresolved — no basis invented)`,
+  );
+  console.log(`  Income events: ${result.income.length}`);
+  console.log(`  Open positions: ${result.openLots.length} lots\n`);
+
+  if (result.flags.length > 0) {
+    const byKind = new Map<string, number>();
+    for (const f of result.flags) byKind.set(f.kind, (byKind.get(f.kind) ?? 0) + 1);
+    console.log("  Flagged for review:");
+    for (const [kind, count] of [...byKind.entries()].sort((a, b) => b[1] - a[1])) {
+      console.log(`    ${kind.padEnd(20)} ${count}`);
+    }
+    console.log(
+      `\n  Every flag has a signature — use \`soltax events ${address} --json\`` +
+        " to inspect, or the fixtures loop to teach the classifier.",
+    );
+  } else {
+    console.log("  No flags — every disposal fully resolved.");
+  }
+}
+
+async function runEvents(address: string, flags: string[]): Promise<void> {
+  validateAddressOrExit(address);
+  const includeSpam = flags.includes("--include-spam");
+  const asJson = flags.includes("--json");
+  const events = await collectPricedEvents(address, includeSpam, asJson);
+
+  if (asJson) {
+    for (const e of events) console.log(JSON.stringify(e));
+    return;
+  }
+
+  for (const e of events) console.log(fmtEventLine(e));
+
+  const priced = events.filter((e) => e.usdValue !== null).length;
+  const needing = events.filter((e) => e.needsPrice).length;
+  const feesUsd = events.reduce((s, e) => s + (e.feeUsd ?? 0), 0);
+  console.log(
+    `\n${events.length} events · ${priced} priced · ${needing} NEEDS_PRICE · ` +
+      `network fees $${feesUsd.toFixed(2)}`,
+  );
 }
 
 async function runUnknowns(address: string): Promise<void> {
@@ -243,6 +293,16 @@ async function main(argv: string[]): Promise<void> {
         process.exit(1);
       }
       await runEvents(address, rest.slice(1));
+      break;
+    }
+    case "gains": {
+      const address = rest[0];
+      if (!address) {
+        console.error("Error: missing <solana-wallet-address> argument.");
+        printUsage();
+        process.exit(1);
+      }
+      await runGains(address);
       break;
     }
     case "unknowns": {
