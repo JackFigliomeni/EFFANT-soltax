@@ -9,8 +9,11 @@ import { HeliusClient } from "./helius/heliusClient.js";
 import { TransactionCache } from "./helius/transactionCache.js";
 import { EventPricer, type PricedEvent } from "./pricing/eventPricer.js";
 import { SolPriceFeed } from "./pricing/solPriceFeed.js";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { auditFifoResult } from "./tax/audit.js";
 import { FifoEngine } from "./tax/fifoEngine.js";
+import { buildReports } from "./tax/reports.js";
 
 function printUsage(): void {
   console.error(
@@ -23,6 +26,9 @@ function printUsage(): void {
       "      --include-spam    keep SPAM and FAILED events in the output",
       "      --json            emit one JSON object per line instead of a table",
       "  gains <solana-wallet-address>              FIFO cost-basis report: gains, income, flags",
+      "  report <solana-wallet-address> [flags]     write tax report files (8949, TurboTax, ledger)",
+      "      --year YYYY       limit to one UTC calendar tax year",
+      "      --out <dir>       output directory (default: reports/<wallet>)",
       "  unknowns <solana-wallet-address>           list unclassified cached txs by program frequency",
       "  test-fixtures [dir]                        run the classifier against fixtures (default: fixtures/)",
     ].join("\n"),
@@ -206,6 +212,50 @@ async function runGains(address: string): Promise<void> {
   }
 }
 
+async function runReport(address: string, flags: string[]): Promise<void> {
+  validateAddressOrExit(address);
+
+  const yearIdx = flags.indexOf("--year");
+  const year = yearIdx >= 0 ? Number(flags[yearIdx + 1]) : undefined;
+  if (yearIdx >= 0 && (!Number.isInteger(year) || year! < 2020 || year! > 2100)) {
+    console.error("Error: --year requires a valid year, e.g. --year 2025");
+    process.exit(1);
+  }
+  const outIdx = flags.indexOf("--out");
+  const outDir = outIdx >= 0 && flags[outIdx + 1]
+    ? flags[outIdx + 1]!
+    : join("reports", address);
+
+  // Ledger wants every transaction, spam included; the engine ignores
+  // SPAM/FAILED internally, so one collection serves both.
+  const events = await collectPricedEvents(address, true, false);
+  const result = new FifoEngine().process(events);
+  const audit = auditFifoResult(events, result);
+
+  if (!audit.ok) {
+    console.error("Error: the math audit failed — refusing to write reports:");
+    for (const c of audit.checks.filter((x) => !x.ok)) {
+      console.error(`  ✗ ${c.name}: ${c.detail}`);
+    }
+    process.exit(1);
+  }
+
+  const bundle = buildReports(events, result, {
+    wallet: address,
+    ...(year !== undefined && { year }),
+    audit,
+  });
+
+  await mkdir(outDir, { recursive: true });
+  for (const [name, content] of bundle.files) {
+    await writeFile(join(outDir, name), content, "utf8");
+  }
+
+  console.log(bundle.summaryText);
+  console.log(`Files written to ${outDir}/:`);
+  for (const name of bundle.files.keys()) console.log(`  ${name}`);
+}
+
 async function runEvents(address: string, flags: string[]): Promise<void> {
   validateAddressOrExit(address);
   const includeSpam = flags.includes("--include-spam");
@@ -305,6 +355,16 @@ async function main(argv: string[]): Promise<void> {
         process.exit(1);
       }
       await runEvents(address, rest.slice(1));
+      break;
+    }
+    case "report": {
+      const address = rest[0];
+      if (!address) {
+        console.error("Error: missing <solana-wallet-address> argument.");
+        printUsage();
+        process.exit(1);
+      }
+      await runReport(address, rest.slice(1));
       break;
     }
     case "gains": {
