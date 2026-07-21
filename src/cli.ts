@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import "dotenv/config";
 import { analyze, InvalidSolanaAddressError } from "./analyze.js";
-import { classifyStream } from "./classifier/classifier.js";
+import { classifyStream, classifyTransaction } from "./classifier/classifier.js";
 import { runFixtures } from "./classifier/fixtureRunner.js";
 import { NATIVE_SOL_MINT } from "./classifier/programs.js";
 import { collectUnknowns } from "./classifier/unknowns.js";
@@ -30,6 +30,7 @@ function printUsage(): void {
       "      --year YYYY       limit to one UTC calendar tax year",
       "      --out <dir>       output directory (default: reports/<wallet>)",
       "  unknowns <solana-wallet-address>           list unclassified cached txs by program frequency",
+      "  benchmark <wallet> [<wallet>...]           classification-rate stats across wallets",
       "  test-fixtures [dir]                        run the classifier against fixtures (default: fixtures/)",
     ].join("\n"),
   );
@@ -312,6 +313,82 @@ async function runUnknowns(address: string): Promise<void> {
   }
 }
 
+async function runBenchmark(addresses: string[]): Promise<void> {
+  for (const address of addresses) validateAddressOrExit(address);
+
+  interface Row {
+    wallet: string;
+    total: number;
+    unknown: number;
+    spam: number;
+  }
+  const rows: Row[] = [];
+
+  for (const address of addresses) {
+    let cache = await TransactionCache.open(cacheDir(), address);
+    if (cache.size === 0) {
+      await cache.close();
+      const apiKey = process.env["HELIUS_API_KEY"];
+      if (!apiKey) {
+        console.error(
+          `Error: ${address} is not cached and HELIUS_API_KEY is not set — ` +
+            `run "soltax analyze ${address}" first.`,
+        );
+        process.exit(1);
+      }
+      process.stderr.write(`fetching ${address}…\n`);
+      const client = new HeliusClient({ apiKey, cacheDir: cacheDir() });
+      await client.fetchHistory(address);
+      cache = await TransactionCache.open(cacheDir(), address);
+    }
+
+    try {
+      let total = 0;
+      let unknown = 0;
+      let spam = 0;
+      for await (const tx of cache.readAll()) {
+        const event = classifyTransaction(tx, {
+          wallet: address,
+          ownedWallets: ownedWallets(),
+        });
+        total += 1;
+        if (event.type === "UNKNOWN") unknown += 1;
+        if (event.type === "SPAM" || event.type === "FAILED") spam += 1;
+      }
+      rows.push({ wallet: address, total, unknown, spam });
+    } finally {
+      await cache.close();
+    }
+  }
+
+  const pct = (n: number, d: number): string =>
+    d === 0 ? "—" : `${((n / d) * 100).toFixed(1)}%`;
+
+  console.log(`SOLTAX classification benchmark — ${new Date().toISOString().slice(0, 10)}\n`);
+  console.log(
+    "Wallet".padEnd(46) + "Txs".padStart(8) + "Classified".padStart(12) +
+      "Unknown".padStart(9) + "Spam".padStart(8),
+  );
+  console.log("-".repeat(83));
+  let totalTxs = 0;
+  let totalUnknown = 0;
+  for (const r of rows) {
+    totalTxs += r.total;
+    totalUnknown += r.unknown;
+    console.log(
+      r.wallet.padEnd(46) + String(r.total).padStart(8) +
+        pct(r.total - r.unknown, r.total).padStart(12) +
+        String(r.unknown).padStart(9) + pct(r.spam, r.total).padStart(8),
+    );
+  }
+  console.log("-".repeat(83));
+  console.log(
+    "TOTAL".padEnd(46) + String(totalTxs).padStart(8) +
+      pct(totalTxs - totalUnknown, totalTxs).padStart(12) +
+      String(totalUnknown).padStart(9),
+  );
+}
+
 async function runTestFixtures(dir: string): Promise<void> {
   const report = await runFixtures(dir);
 
@@ -385,6 +462,15 @@ async function main(argv: string[]): Promise<void> {
         process.exit(1);
       }
       await runUnknowns(address);
+      break;
+    }
+    case "benchmark": {
+      if (rest.length === 0) {
+        console.error("Error: benchmark needs at least one wallet address.");
+        printUsage();
+        process.exit(1);
+      }
+      await runBenchmark(rest);
       break;
     }
     case "test-fixtures": {

@@ -187,7 +187,15 @@ export function classifyTransaction(
   // silently mislabeled.
   if (primaryGave && primaryGot) {
     const heliusSaysSwap = tx.type === "SWAP" && tx.source !== "UNKNOWN";
-    const swapProtocol = protocol ?? (heliusSaysSwap ? tx.source : null);
+    // Helius source tags sometimes differ from our program-derived names for
+    // the same venue — normalize known aliases so one venue = one label.
+    const SOURCE_ALIASES: Record<string, string> = {
+      OKX_DEX_ROUTER: "OKX",
+      PUMP_AMM: "PUMPSWAP",
+      PUMP_FUN: "PUMPFUN",
+    };
+    const swapProtocol =
+      protocol ?? (heliusSaysSwap ? (SOURCE_ALIASES[tx.source] ?? tx.source) : null);
     return event(swapProtocol !== null ? "SWAP" : "UNKNOWN", {
       protocol: swapProtocol,
       tokenInMint: primaryGave.mint,
