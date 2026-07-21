@@ -64,6 +64,11 @@ export interface FifoResult {
     ordinaryIncomeUsd: number;
     /** Disposals whose gain/loss could not be computed. */
     unresolvedDisposals: number;
+    /**
+     * USD basis that left the portfolio via TRANSFER_OUT (un-taxed, pending
+     * review). Null when any withdrawn lot had unknown basis.
+     */
+    withdrawnBasisUsd: number | null;
   };
 }
 
@@ -99,6 +104,8 @@ export class FifoEngine {
   private readonly disposals: Disposal[] = [];
   private readonly income: IncomeEntry[] = [];
   private readonly flags: FlaggedItem[] = [];
+  private withdrawnBasisUsd = 0;
+  private withdrawnBasisKnown = true;
 
   process(events: Iterable<PricedEvent>): FifoResult {
     const ordered = [...events].sort(
@@ -163,6 +170,7 @@ export class FifoEngine {
         longTermGainUsd: longTerm,
         ordinaryIncomeUsd: ordinaryIncome,
         unresolvedDisposals: unresolved,
+        withdrawnBasisUsd: this.withdrawnBasisKnown ? this.withdrawnBasisUsd : null,
       },
     };
   }
@@ -200,7 +208,10 @@ export class FifoEngine {
     if (event.tokenInMint === null || event.amountIn === null || event.amountIn <= 0) return;
     // Not treated as a disposal: the assets (and their basis) leave the
     // portfolio un-taxed, pending human reclassification.
-    const removed = this.consumeLots(event.tokenInMint, event.amountIn);
+    const removed = this.consumeLots(event.tokenInMint, event.amountIn, (_lot, _take, basisPortion) => {
+      if (basisPortion === null) this.withdrawnBasisKnown = false;
+      else this.withdrawnBasisUsd += basisPortion;
+    });
     this.flag("REVIEW_WITHDRAWAL", event, event.tokenInMint,
       `sent ${event.amountIn} to an external address — reclassify as gift/payment/owned wallet`);
     if (removed.missing > EPSILON) {

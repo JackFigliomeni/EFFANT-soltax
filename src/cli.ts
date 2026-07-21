@@ -9,6 +9,7 @@ import { HeliusClient } from "./helius/heliusClient.js";
 import { TransactionCache } from "./helius/transactionCache.js";
 import { EventPricer, type PricedEvent } from "./pricing/eventPricer.js";
 import { SolPriceFeed } from "./pricing/solPriceFeed.js";
+import { auditFifoResult } from "./tax/audit.js";
 import { FifoEngine } from "./tax/fifoEngine.js";
 
 function printUsage(): void {
@@ -191,6 +192,17 @@ async function runGains(address: string): Promise<void> {
     );
   } else {
     console.log("  No flags — every disposal fully resolved.");
+  }
+
+  const audit = auditFifoResult(events, result);
+  console.log(`\n  Math audit: ${audit.ok ? "PASS" : "FAIL"}`);
+  for (const c of audit.checks) {
+    const mark = c.skipped ? "–" : c.ok ? "✓" : "✗";
+    console.log(`    ${mark} ${c.name}: ${c.detail}`);
+  }
+  if (!audit.ok) {
+    console.error("\nError: the math audit failed — numbers above are not trustworthy.");
+    process.exit(1);
   }
 }
 
