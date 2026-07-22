@@ -74,9 +74,11 @@ function build8949Section(rows: Disposal[]): string {
   let basis = 0;
   let gain = 0;
   for (const d of rows) {
-    proceeds += d.proceedsUsd!;
-    basis += d.costBasisUsd!;
-    gain += d.gainLossUsd!;
+    // Sum the rounded, printed values so the TOTAL row reconciles exactly
+    // with the rows above it (what actually gets filed).
+    proceeds += Number(usd2(d.proceedsUsd!));
+    basis += Number(usd2(d.costBasisUsd!));
+    gain += Number(usd2(d.gainLossUsd!));
     lines.push(
       csvLine(
         describe(d),
