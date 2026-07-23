@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "CLI for analyzing Solana wallet addresses",
+  "description": "Solana-only tax engine: fetch, classify, price, and report a wallet's complete on-chain history",
+  "engines": {
+    "node": ">=20"
+  },
   "bin": {
     "soltax": "./dist/cli.js"
   },

@@ -8,6 +8,7 @@ import { collectUnknowns } from "./classifier/unknowns.js";
 import { HeliusClient } from "./helius/heliusClient.js";
 import { TransactionCache } from "./helius/transactionCache.js";
 import { EventPricer, type PricedEvent } from "./pricing/eventPricer.js";
+import { mergePortfolioEvents } from "./pricing/portfolio.js";
 import { SolPriceFeed } from "./pricing/solPriceFeed.js";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -20,18 +21,21 @@ function printUsage(): void {
     [
       "Usage: soltax <command>",
       "",
-      "Commands:",
-      "  analyze <solana-wallet-address>            validate the address and fetch full history",
-      "  events <solana-wallet-address> [flags]     classified events with USD values",
+      "Commands (multiple wallets = one merged portfolio; inter-wallet",
+      "transfers become non-taxable SELF_TRANSFERs):",
+      "",
+      "  run <wallet>... [flags]          fetch + full tax report + benchmark, one shot",
+      "  analyze <wallet>                 validate the address and fetch full history",
+      "  events <wallet>... [flags]       classified events with USD values",
       "      --include-spam    keep SPAM and FAILED events in the output",
       "      --json            emit one JSON object per line instead of a table",
-      "  gains <solana-wallet-address>              FIFO cost-basis report: gains, income, flags",
-      "  report <solana-wallet-address> [flags]     write tax report files (8949, TurboTax, ledger)",
+      "  gains <wallet>...                FIFO cost-basis report: gains, income, flags",
+      "  report <wallet>... [flags]       write tax report files (8949, TurboTax, ledger)",
       "      --year YYYY       limit to one UTC calendar tax year",
       "      --out <dir>       output directory (default: reports/<wallet>)",
-      "  unknowns <solana-wallet-address>           list unclassified cached txs by program frequency",
-      "  benchmark <wallet> [<wallet>...]           classification-rate stats across wallets",
-      "  test-fixtures [dir]                        run the classifier against fixtures (default: fixtures/)",
+      "  unknowns <wallet>                list unclassified cached txs by program frequency",
+      "  benchmark <wallet>...            classification-rate stats across wallets",
+      "  test-fixtures [dir]              run the classifier against fixtures (default: fixtures/)",
     ].join("\n"),
   );
 }
@@ -120,45 +124,73 @@ function fmtEventLine(e: PricedEvent): string {
   return `${when}  ${type} ${proto} ${legs} ${value}`;
 }
 
-/** Streams cache -> classifier -> pricer and returns chronological events. */
-async function collectPricedEvents(
-  address: string,
+/** Splits CLI args into leading wallet addresses and trailing --flags. */
+function splitArgs(rest: string[]): { addresses: string[]; flags: string[] } {
+  const firstFlag = rest.findIndex((a) => a.startsWith("--"));
+  const addresses = firstFlag === -1 ? rest : rest.slice(0, firstFlag);
+  const flags = firstFlag === -1 ? [] : rest.slice(firstFlag);
+  return { addresses, flags };
+}
+
+/**
+ * Streams every wallet's cache -> classifier -> pricer, then merges the
+ * per-wallet streams into one chronological portfolio (one event per
+ * signature). Each wallet is classified with the other wallets as owned, so
+ * inter-wallet transfers become SELF_TRANSFERs.
+ */
+async function collectPortfolioEvents(
+  addresses: string[],
   includeSpam: boolean,
   quiet: boolean,
 ): Promise<PricedEvent[]> {
-  const cache = await TransactionCache.open(cacheDir(), address);
-  try {
-    if (cache.size === 0) {
-      console.error(
-        `Error: no cached history for ${address}. Run "soltax analyze ${address}" first.`,
-      );
-      process.exit(1);
-    }
+  const feed = new SolPriceFeed({
+    cacheDir: process.env["SOLTAX_PRICE_CACHE_DIR"] ?? ".cache/prices/sol-usd",
+    ...(process.env["COINGECKO_API_KEY"] && {
+      coinGeckoApiKey: process.env["COINGECKO_API_KEY"],
+    }),
+  });
+  const pricer = new EventPricer(feed);
+  const envOwned = ownedWallets();
 
-    const feed = new SolPriceFeed({
-      cacheDir: process.env["SOLTAX_PRICE_CACHE_DIR"] ?? ".cache/prices/sol-usd",
-      ...(process.env["COINGECKO_API_KEY"] && {
-        coinGeckoApiKey: process.env["COINGECKO_API_KEY"],
-      }),
-    });
-    const pricer = new EventPricer(feed);
+  const all: PricedEvent[] = [];
+  for (const address of addresses) {
+    const cache = await TransactionCache.open(cacheDir(), address);
+    try {
+      if (cache.size === 0) {
+        console.error(
+          `Error: no cached history for ${address}. Run "soltax analyze ${address}" first.`,
+        );
+        process.exit(1);
+      }
 
-    const events: PricedEvent[] = [];
-    const stream = classifyStream(cache.readAll(), {
-      wallet: address,
-      ownedWallets: ownedWallets(),
-      includeSpam,
-    });
-    for await (const priced of pricer.priceEvents(stream)) {
-      events.push(priced);
-      if (!quiet) process.stderr.write(`\r  pricing… ${events.length}`);
+      const owned = [...new Set([...addresses.filter((a) => a !== address), ...envOwned])];
+      const stream = classifyStream(cache.readAll(), {
+        wallet: address,
+        ownedWallets: owned,
+        includeSpam,
+      });
+      for await (const priced of pricer.priceEvents(stream)) {
+        all.push(priced);
+        if (!quiet) process.stderr.write(`\r  pricing… ${all.length}`);
+      }
+    } finally {
+      await cache.close();
     }
-    if (!quiet) process.stderr.write("\r");
-    events.sort((a, b) => a.timestamp - b.timestamp);
-    return events;
-  } finally {
-    await cache.close();
   }
+  if (!quiet) process.stderr.write("\r");
+  return mergePortfolioEvents(all);
+}
+
+function portfolioLabel(addresses: string[]): string {
+  return addresses.length === 1
+    ? addresses[0]!
+    : `portfolio of ${addresses.length} wallets: ${addresses.join(", ")}`;
+}
+
+function defaultOutDir(addresses: string[]): string {
+  return addresses.length === 1
+    ? join("reports", addresses[0]!)
+    : join("reports", `portfolio-${addresses.length}w-${addresses[0]!.slice(0, 8)}`);
 }
 
 function usd(n: number): string {
@@ -169,13 +201,13 @@ function usd(n: number): string {
   })}`;
 }
 
-async function runGains(address: string): Promise<void> {
-  validateAddressOrExit(address);
-  const events = await collectPricedEvents(address, false, false);
+async function runGains(addresses: string[]): Promise<void> {
+  for (const address of addresses) validateAddressOrExit(address);
+  const events = await collectPortfolioEvents(addresses, false, false);
   const result = new FifoEngine().process(events);
   const t = result.totals;
 
-  console.log(`FIFO cost-basis report for ${address}\n`);
+  console.log(`FIFO cost-basis report for ${portfolioLabel(addresses)}\n`);
   console.log(`  Short-term gain/loss   ${usd(t.shortTermGainUsd)}`);
   console.log(`  Long-term gain/loss    ${usd(t.longTermGainUsd)}`);
   console.log(`  Ordinary income        ${usd(t.ordinaryIncomeUsd)}`);
@@ -194,7 +226,7 @@ async function runGains(address: string): Promise<void> {
       console.log(`    ${kind.padEnd(20)} ${count}`);
     }
     console.log(
-      `\n  Every flag has a signature — use \`soltax events ${address} --json\`` +
+      `\n  Every flag has a signature — use \`soltax events ${addresses.join(" ")} --json\`` +
         " to inspect, or the fixtures loop to teach the classifier.",
     );
   } else {
@@ -213,8 +245,8 @@ async function runGains(address: string): Promise<void> {
   }
 }
 
-async function runReport(address: string, flags: string[]): Promise<void> {
-  validateAddressOrExit(address);
+async function runReport(addresses: string[], flags: string[]): Promise<void> {
+  for (const address of addresses) validateAddressOrExit(address);
 
   const yearIdx = flags.indexOf("--year");
   const year = yearIdx >= 0 ? Number(flags[yearIdx + 1]) : undefined;
@@ -225,11 +257,11 @@ async function runReport(address: string, flags: string[]): Promise<void> {
   const outIdx = flags.indexOf("--out");
   const outDir = outIdx >= 0 && flags[outIdx + 1]
     ? flags[outIdx + 1]!
-    : join("reports", address);
+    : defaultOutDir(addresses);
 
   // Ledger wants every transaction, spam included; the engine ignores
   // SPAM/FAILED internally, so one collection serves both.
-  const events = await collectPricedEvents(address, true, false);
+  const events = await collectPortfolioEvents(addresses, true, false);
   const result = new FifoEngine().process(events);
   const audit = auditFifoResult(events, result);
 
@@ -242,7 +274,7 @@ async function runReport(address: string, flags: string[]): Promise<void> {
   }
 
   const bundle = buildReports(events, result, {
-    wallet: address,
+    wallet: portfolioLabel(addresses),
     ...(year !== undefined && { year }),
     audit,
   });
@@ -257,11 +289,11 @@ async function runReport(address: string, flags: string[]): Promise<void> {
   for (const name of bundle.files.keys()) console.log(`  ${name}`);
 }
 
-async function runEvents(address: string, flags: string[]): Promise<void> {
-  validateAddressOrExit(address);
+async function runEvents(addresses: string[], flags: string[]): Promise<void> {
+  for (const address of addresses) validateAddressOrExit(address);
   const includeSpam = flags.includes("--include-spam");
   const asJson = flags.includes("--json");
-  const events = await collectPricedEvents(address, includeSpam, asJson);
+  const events = await collectPortfolioEvents(addresses, includeSpam, asJson);
 
   if (asJson) {
     for (const e of events) console.log(JSON.stringify(e));
@@ -389,6 +421,36 @@ async function runBenchmark(addresses: string[]): Promise<void> {
   );
 }
 
+/** One-shot volunteer flow: fetch every wallet, write the report, benchmark. */
+async function runRun(addresses: string[], flags: string[]): Promise<void> {
+  for (const address of addresses) validateAddressOrExit(address);
+
+  const apiKey = process.env["HELIUS_API_KEY"];
+  for (const address of addresses) {
+    if (apiKey) {
+      const client = new HeliusClient({ apiKey, cacheDir: cacheDir() });
+      process.stderr.write(`fetching ${address}…`);
+      const result = await client.fetchHistory(address);
+      process.stderr.write(` ${result.total} txs (${result.fetched} new)\n`);
+    } else {
+      const cache = await TransactionCache.open(cacheDir(), address);
+      const cached = cache.size;
+      await cache.close();
+      if (cached === 0) {
+        console.error(
+          `Error: HELIUS_API_KEY is not set and ${address} is not cached — cannot proceed.`,
+        );
+        process.exit(1);
+      }
+      process.stderr.write(`no API key — using ${cached} cached txs for ${address}\n`);
+    }
+  }
+
+  await runReport(addresses, flags);
+  console.log("");
+  await runBenchmark(addresses);
+}
+
 async function runTestFixtures(dir: string): Promise<void> {
   const report = await runFixtures(dir);
 
@@ -424,34 +486,20 @@ async function main(argv: string[]): Promise<void> {
       await runAnalyze(address);
       break;
     }
-    case "events": {
-      const address = rest[0];
-      if (!address) {
-        console.error("Error: missing <solana-wallet-address> argument.");
-        printUsage();
-        process.exit(1);
-      }
-      await runEvents(address, rest.slice(1));
-      break;
-    }
-    case "report": {
-      const address = rest[0];
-      if (!address) {
-        console.error("Error: missing <solana-wallet-address> argument.");
-        printUsage();
-        process.exit(1);
-      }
-      await runReport(address, rest.slice(1));
-      break;
-    }
+    case "run":
+    case "events":
+    case "report":
     case "gains": {
-      const address = rest[0];
-      if (!address) {
-        console.error("Error: missing <solana-wallet-address> argument.");
+      const { addresses, flags } = splitArgs(rest);
+      if (addresses.length === 0) {
+        console.error("Error: missing <solana-wallet-address> argument(s).");
         printUsage();
         process.exit(1);
       }
-      await runGains(address);
+      if (command === "run") await runRun(addresses, flags);
+      else if (command === "events") await runEvents(addresses, flags);
+      else if (command === "report") await runReport(addresses, flags);
+      else await runGains(addresses);
       break;
     }
     case "unknowns": {
