@@ -51,6 +51,46 @@ function ownedWallets(): string[] {
     .filter((w) => w.length > 0);
 }
 
+/**
+ * Resolves the Helius API key, tolerating the two mistakes that are easy to
+ * make when setting up .env: pasting a full Helius RPC URL instead of the
+ * bare key, and surrounding quotes. Returns the 32-hex-with-dashes key, or
+ * null with a clear reason if unusable.
+ */
+function resolveHeliusApiKey(): { key: string } | { error: string } {
+  let raw = (process.env["HELIUS_API_KEY"] ?? "").trim().replace(/^["']|["']$/g, "");
+  if (!raw) {
+    return {
+      error:
+        "HELIUS_API_KEY is not set. Add it to your .env file as a single line:\n" +
+        "  HELIUS_API_KEY=your-key-here\n" +
+        "Get a free key at https://dashboard.helius.dev (no https://, no quotes).",
+    };
+  }
+  // Someone pasted the whole RPC URL — pull the key out of it.
+  if (raw.includes("api-key=")) {
+    const match = /api-key=([0-9a-fA-F-]{36})/.exec(raw);
+    if (match) raw = match[1]!;
+  }
+  if (!/^[0-9a-fA-F-]{36}$/.test(raw)) {
+    return {
+      error:
+        `HELIUS_API_KEY doesn't look like a valid key (got ${raw.length} chars). ` +
+        "It should be a 36-character UUID. Copy it from https://dashboard.helius.dev.",
+    };
+  }
+  return { key: raw };
+}
+
+function requireHeliusKeyOrExit(): string {
+  const resolved = resolveHeliusApiKey();
+  if ("error" in resolved) {
+    console.error(`Error: ${resolved.error}`);
+    process.exit(1);
+  }
+  return resolved.key;
+}
+
 function validateAddressOrExit(address: string): void {
   try {
     analyze(address);
@@ -67,15 +107,7 @@ async function runAnalyze(address: string): Promise<void> {
   validateAddressOrExit(address);
   console.log(`Valid Solana address: ${address}`);
 
-  const apiKey = process.env["HELIUS_API_KEY"];
-  if (!apiKey) {
-    console.error(
-      "Error: HELIUS_API_KEY is not set. Add it to your .env file " +
-        "(see .env.example) to fetch transaction history.",
-    );
-    process.exit(1);
-  }
-
+  const apiKey = requireHeliusKeyOrExit();
   const client = new HeliusClient({ apiKey, cacheDir: cacheDir() });
 
   console.log("Fetching transaction history from Helius...");
@@ -360,16 +392,15 @@ async function runBenchmark(addresses: string[]): Promise<void> {
     let cache = await TransactionCache.open(cacheDir(), address);
     if (cache.size === 0) {
       await cache.close();
-      const apiKey = process.env["HELIUS_API_KEY"];
-      if (!apiKey) {
+      const resolved = resolveHeliusApiKey();
+      if ("error" in resolved) {
         console.error(
-          `Error: ${address} is not cached and HELIUS_API_KEY is not set — ` +
-            `run "soltax analyze ${address}" first.`,
+          `Error: ${address} is not cached and no usable key — ${resolved.error}`,
         );
         process.exit(1);
       }
       process.stderr.write(`fetching ${address}…\n`);
-      const client = new HeliusClient({ apiKey, cacheDir: cacheDir() });
+      const client = new HeliusClient({ apiKey: resolved.key, cacheDir: cacheDir() });
       await client.fetchHistory(address);
       cache = await TransactionCache.open(cacheDir(), address);
     }
@@ -425,7 +456,8 @@ async function runBenchmark(addresses: string[]): Promise<void> {
 async function runRun(addresses: string[], flags: string[]): Promise<void> {
   for (const address of addresses) validateAddressOrExit(address);
 
-  const apiKey = process.env["HELIUS_API_KEY"];
+  const resolved = resolveHeliusApiKey();
+  const apiKey = "key" in resolved ? resolved.key : null;
   for (const address of addresses) {
     if (apiKey) {
       const client = new HeliusClient({ apiKey, cacheDir: cacheDir() });
@@ -437,9 +469,7 @@ async function runRun(addresses: string[], flags: string[]): Promise<void> {
       const cached = cache.size;
       await cache.close();
       if (cached === 0) {
-        console.error(
-          `Error: HELIUS_API_KEY is not set and ${address} is not cached — cannot proceed.`,
-        );
+        console.error(`Error: ${address} is not cached — ${(resolved as { error: string }).error}`);
         process.exit(1);
       }
       process.stderr.write(`no API key — using ${cached} cached txs for ${address}\n`);
